@@ -1666,8 +1666,7 @@ worldometersdf &lt;- xml2::read_html(&quot;https://www.worldometers.info/coronav
   dplyr::mutate_at(.vars=c(&quot;TotCasesPer1Mpop&quot;, &quot;TestsPer1Mpop&quot;), .funs=list(~as.numeric(.)) ) %&gt;%
   dplyr::filter(!is.na(TotCasesPer1Mpop), !is.na(TestsPer1Mpop)) %&gt;%
   dplyr::mutate_at(.vars=c(&quot;TotCasesPer1Mpop&quot;, &quot;TestsPer1Mpop&quot;), function(X) {
-    y &lt;- as.numeric(X)
-    y &lt;- scale(y)
+    y &lt;- scale(X)
     y &lt;- y[,1]
     return(y)
   })</code></pre>
@@ -1680,19 +1679,19 @@ summary(linearMod)</code></pre>
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -2.0154 -0.1904 -0.1614 -0.0115  6.9487 
+## -2.0154 -0.1905 -0.1614 -0.0116  6.9474 
 ## 
 ## Coefficients:
 ##                Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)   4.080e-17  6.317e-02    0.00        1    
-## TestsPer1Mpop 5.741e-01  6.336e-02    9.06 3.38e-16 ***
+## (Intercept)   2.904e-17  6.318e-02   0.000        1    
+## TestsPer1Mpop 5.740e-01  6.336e-02   9.059 3.38e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## Residual standard error: 0.8213 on 167 degrees of freedom
 ## Multiple R-squared:  0.3295, Adjusted R-squared:  0.3255 
-## F-statistic: 82.08 on 1 and 167 DF,  p-value: 3.376e-16</code></pre>
-<p>結果顯示篩檢覆蓋率顯著影響確診率（p=3.55×10<sup>-16</sup> &lt; 0.05），兩者間呈現中度正相關關係（a=0.5738，也就是回歸係數R值，R值在±0.5~±0.7之間時，顯示有中度相關）, b=2.325×10<sup>17</sup>。</p>
+## F-statistic: 82.07 on 1 and 167 DF,  p-value: 3.384e-16</code></pre>
+<p>結果顯示篩檢覆蓋率顯著影響確診率（p=3.55×10<sup>-16</sup> &lt; 0.05），兩者間呈現中度正相關關係（a=0.5738，也就是回歸係數R值，R值在±0.5~±0.7之間時，顯示有中度相關）, b=2.325×10<sup>-17</sup>。</p>
 
 
 

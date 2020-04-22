@@ -25,8 +25,7 @@ covidwmeters <- worldometersdf  %>%
   dplyr::mutate_at(.vars=c("TotCasesPer1Mpop", "TestsPer1Mpop"), .funs=list(~as.numeric(.)) ) %>%
   dplyr::filter(!is.na(TotCasesPer1Mpop), !is.na(TestsPer1Mpop)) %>%
   dplyr::mutate_at(.vars=c("TotCasesPer1Mpop", "TestsPer1Mpop"), function(X) {
-    y <- as.numeric(X)
-    y <- scale(y)
+    y <- scale(X)
     y <- y[,1]
     return(y)
   })
@@ -39,4 +38,4 @@ covidwmeters <- worldometersdf  %>%
 linearMod <- lm(TotCasesPer1Mpop ~ TestsPer1Mpop, data=covidwmeters)
 summary(linearMod)
 ```
-結果顯示篩檢覆蓋率顯著影響確診率（p=3.55×10<sup>-16</sup> < 0.05），兩者間呈現中度正相關關係（a=0.5738，也就是回歸係數R值，R值在±0.5~±0.7之間時，顯示有中度相關）, b=2.325×10<sup>17</sup>。
+結果顯示篩檢覆蓋率顯著影響確診率（p=3.55×10<sup>-16</sup> < 0.05），兩者間呈現中度正相關關係（a=0.5738，也就是回歸係數R值，R值在±0.5~±0.7之間時，顯示有中度相關）, b=2.325×10<sup>-17</sup>。
