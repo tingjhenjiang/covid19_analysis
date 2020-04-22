@@ -1,0 +1,35 @@
+---
+title: "以worldometers.info武漢肺炎數據分析確診率與檢驗覆蓋率關係"
+output: html_notebook
+---
+
+爬蟲取得資料
+
+```{r}
+library(magrittr)
+worldometersdf <- xml2::read_html("https://www.worldometers.info/coronavirus/") %>%
+  rvest::html_nodes(xpath = "//table[@id='main_table_countries_today']") %>%
+  rvest::html_table(header=TRUE) %>%
+  magrittr::extract2(1) %>%
+  dplyr::rename_at(dplyr::vars(dplyr::contains(" ")), .funs=list(~gsub(" ","", .)) ) %>%
+  dplyr::rename_at(dplyr::vars(dplyr::contains("/")), .funs=list(~gsub("/","Per", .)) )
+```
+
+清理資料：選取沒有遺漏值的觀察對象，並且把變數標準化
+
+```{r}
+covidwmeters <- openxlsx::read.xlsx("worldometers.xlsx") %>%
+  dplyr::filter(!is.na(TotCasesPer1Mpop), !is.na(TestsPer1Mpop)) %>%
+  dplyr::mutate_at(.vars=c("TotCasesPer1Mpop", "TestsPer1Mpop"), .funs = function(X) {
+    y <- scale(X)
+    y <- y[,1]
+    return(y)
+  })
+```
+
+推論統計建模簡單迴歸模型並顯示結果
+
+```{r}
+linearMod <- lm(TotCasesPer1Mpop ~ TestsPer1Mpop, data=covidwmeters)
+summary(linearMod)
+```
