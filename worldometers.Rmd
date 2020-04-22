@@ -1,6 +1,8 @@
 ---
 title: "以worldometers.info武漢肺炎數據分析確診率與檢驗覆蓋率關係"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 爬蟲取得資料
@@ -11,25 +13,30 @@ worldometersdf <- xml2::read_html("https://www.worldometers.info/coronavirus/") 
   rvest::html_nodes(xpath = "//table[@id='main_table_countries_today']") %>%
   rvest::html_table(header=TRUE) %>%
   magrittr::extract2(1) %>%
-  dplyr::rename_at(dplyr::vars(dplyr::contains(" ")), .funs=list(~gsub(" ","", .)) ) %>%
-  dplyr::rename_at(dplyr::vars(dplyr::contains("/")), .funs=list(~gsub("/","Per", .)) )
+  dplyr::rename_all(.funs=list(~stringr::str_replace_all(., "/","Per")) ) %>%
+  dplyr::rename_all(.funs=list(~stringr::str_replace_all(., "[\\W\\s]","")) )
 ```
 
-清理資料：選取沒有遺漏值的觀察對象，並且把變數標準化
+清理資料：調整為正確型態、選取沒有遺漏值的觀察對象，並且把變數標準化
 
 ```{r}
-covidwmeters <- openxlsx::read.xlsx("worldometers.xlsx") %>%
+covidwmeters <- worldometersdf  %>%
+  dplyr::mutate_at(.vars=c("TotCasesPer1Mpop", "TestsPer1Mpop"), .funs=list(~stringr::str_replace_all(., ",","")) )  %>%
+  dplyr::mutate_at(.vars=c("TotCasesPer1Mpop", "TestsPer1Mpop"), .funs=list(~as.numeric(.)) ) %>%
   dplyr::filter(!is.na(TotCasesPer1Mpop), !is.na(TestsPer1Mpop)) %>%
-  dplyr::mutate_at(.vars=c("TotCasesPer1Mpop", "TestsPer1Mpop"), .funs = function(X) {
-    y <- scale(X)
+  dplyr::mutate_at(.vars=c("TotCasesPer1Mpop", "TestsPer1Mpop"), function(X) {
+    y <- as.numeric(X)
+    y <- scale(y)
     y <- y[,1]
     return(y)
   })
 ```
 
 推論統計建模簡單迴歸模型並顯示結果
+模型設定為簡單迴歸式，Y=aX+b, Y=每百萬人確診人數，X=每百萬人篩檢人數
 
 ```{r}
 linearMod <- lm(TotCasesPer1Mpop ~ TestsPer1Mpop, data=covidwmeters)
 summary(linearMod)
 ```
+結果顯示篩檢覆蓋率顯著影響確診率（p=3.55×10<sup>-16</sup> < 0.05），兩者間呈現正相關關係，a=0.5738（也就是回歸係數R值在±0.3~±0.5之間，顯示有中度相關）, b=2.325×10<sup>17</sup>。
